@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FH Build Studio</title>
+</head>
+<body>
+  <div id="root">Loading FH Build Studio...</div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" data-presets="react">
+const { useState, useMemo } = React;
+
+// ── Car Database ──────────────────────────────────────────────────────────────
+const CARS = [
+  // Abarth
+  { make:"Abarth", name:"1968 Abarth 595 esseesse", type:"Cult Cars", classNum:100, cls:"D", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Abarth", name:"1980 Abarth Fiat 131", type:"Classic Rally", classNum:399, cls:"D", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Abarth", name:"2016 Abarth 695 Biposto", type:"Hot Hatch", classNum:540, cls:"B", country:"Italy", src:"Seasonal", dlc:"" },
+  // Acura
+  { make:"Acura", name:"2001 Acura Integra Type R", type:"Retro Hot Hatch", classNum:471, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Acura", name:"2002 Acura RSX Type S", type:"Retro Hot Hatch", classNum:462, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Acura", name:"2022 Acura NSX Type S", type:"Modern Supercars", classNum:734, cls:"S1", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Acura", name:"2023 Acura Integra A-Spec", type:"Hot Hatch", classNum:484, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  // Alfa Romeo
+  { make:"Alfa Romeo", name:"1965 Alfa Romeo Giulia Sprint GTA Stradale", type:"Rare Classics", classNum:379, cls:"D", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Alfa Romeo", name:"1965 Alfa Romeo Giulia TZ2", type:"Classic Racers", classNum:532, cls:"B", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Alfa Romeo", name:"1968 Alfa Romeo 33 Stradale", type:"Classic Racers", classNum:593, cls:"B", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Alfa Romeo", name:"1990 Alfa Romeo SE 048SP", type:"Retro Racers", classNum:978, cls:"R", country:"Italy", src:"DLC", dlc:"Italian Passion Car Pack" },
+  { make:"Alfa Romeo", name:"1992 Alfa Romeo 155 Q4", type:"Retro Super Saloons", classNum:439, cls:"C", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Alfa Romeo", name:"2007 Alfa Romeo 8C Competizione", type:"GT Cars", classNum:635, cls:"A", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Alfa Romeo", name:"2014 Alfa Romeo 4C", type:"Modern Sports Cars", classNum:644, cls:"A", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Alfa Romeo", name:"2017 Alfa Romeo Giulia Quadrifoglio", type:"Modern Super Saloons", classNum:667, cls:"A", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Alfa Romeo", name:"2021 Alfa Romeo Giulia GTAm", type:"Modern Super Saloons", classNum:717, cls:"S1", country:"Italy", src:"DLC", dlc:"Italian Passion Car Pack" },
+  // Alumicraft
+  { make:"Alumicraft", name:"2015 Alumicraft Class 10 Race Car", type:"Unlimited Buggies", classNum:532, cls:"B", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Alumicraft", name:"2021 Alumicraft #122 Class 1 Buggy", type:"Unlimited Buggies", classNum:571, cls:"B", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Alumicraft", name:"2022 Alumicraft #6165 Trick Truck", type:"Unlimited Offroad", classNum:485, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  // AMG Transport Dynamics
+  { make:"AMG Transport Dynamics", name:"2554 AMG Transport Dynamics M12S Warthog CST", type:"Unlimited Offroad", classNum:663, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  // Apollo
+  { make:"Apollo", name:"2019 Apollo Intensa Emozione", type:"Extreme Track Toys", classNum:916, cls:"R", country:"Germany", src:"Seasonal", dlc:"" },
+  // Ariel
+  { make:"Ariel", name:"2013 Ariel Atom 500 V8", type:"Extreme Track Toys", classNum:825, cls:"S2", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Ariel", name:"2016 Ariel Nomad", type:"Unlimited Buggies", classNum:601, cls:"A", country:"UK", src:"Autoshow", dlc:"" },
+  // Aston Martin
+  { make:"Aston Martin", name:"1964 Aston Martin DB5", type:"Rare Classics", classNum:416, cls:"C", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Aston Martin", name:"2016 Aston Martin Vulcan", type:"Extreme Track Toys", classNum:884, cls:"S2", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Aston Martin", name:"2017 Aston Martin DB11", type:"Super GT", classNum:679, cls:"A", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Aston Martin", name:"2017 Aston Martin Vulcan AMR Pro", type:"Extreme Track Toys", classNum:898, cls:"S2", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Aston Martin", name:"2019 Aston Martin DBS Superleggera", type:"Super GT", classNum:736, cls:"S1", country:"UK", src:"Seasonal", dlc:"" },
+  { make:"Aston Martin", name:"2019 Aston Martin Valhalla Concept Car", type:"Hypercars", classNum:960, cls:"R", country:"UK", src:"Seasonal", dlc:"" },
+  { make:"Aston Martin", name:"2019 Aston Martin Vantage", type:"GT Cars", classNum:696, cls:"A", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Aston Martin", name:"2021 Aston Martin DBX", type:"Sports Utility Heroes", classNum:618, cls:"A", country:"UK", src:"Seasonal", dlc:"" },
+  { make:"Aston Martin", name:"2022 Aston Martin Valkyrie AMR Pro", type:"Extreme Track Toys", classNum:989, cls:"R", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Aston Martin", name:"2023 Aston Martin Valkyrie", type:"Hypercars", classNum:924, cls:"R", country:"UK", src:"Autoshow", dlc:"" },
+  // Audi
+  { make:"Audi", name:"1984 Audi Sport quattro", type:"Retro Rally", classNum:526, cls:"B", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Audi", name:"1986 Audi Sport quattro S1", type:"Rally Monsters", classNum:726, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2001 Audi RS 4 Avant", type:"Retro Super Saloons", classNum:544, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2003 Audi RS 6", type:"Retro Super Saloons", classNum:556, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2006 Audi RS 4", type:"Modern Super Saloons", classNum:593, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2009 Audi R8 LMS", type:"Extreme Track Toys", classNum:810, cls:"S2", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2009 Audi RS 6", type:"Modern Super Saloons", classNum:598, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2010 Audi TT RS Coupé", type:"Modern Sports Cars", classNum:593, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2011 Audi RS 3 Sportback", type:"Super Hot Hatch", classNum:565, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2011 Audi RS 5 Coupé", type:"Modern Super Saloons", classNum:613, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2013 Audi R8 Coupé V10 plus", type:"Modern Supercars", classNum:694, cls:"A", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Audi", name:"2013 Audi RS 4 Avant", type:"Modern Super Saloons", classNum:607, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2013 Audi RS 7 Sportback", type:"Modern Super Saloons", classNum:619, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2015 Audi RS 6 Avant", type:"Modern Super Saloons", classNum:640, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2015 Audi S1", type:"Hot Hatch", classNum:527, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2016 Audi R8 V10 plus", type:"Modern Supercars", classNum:731, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2018 Audi RS 4 Avant", type:"Modern Super Saloons", classNum:637, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2020 Audi R8 V10 performance", type:"Modern Supercars", classNum:738, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2020 Audi RS 3 Sedan", type:"Modern Super Saloons", classNum:617, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2021 Audi RS 6 Avant", type:"Modern Super Saloons", classNum:650, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2021 Audi RS 7 Sportback", type:"Modern Super Saloons", classNum:655, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2021 Audi RS e-tron GT", type:"Modern Super Saloons", classNum:677, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Audi", name:"2023 Audi R8 Coupé V10 GT RWD", type:"Modern Supercars", classNum:769, cls:"S1", country:"Germany", src:"DLC", dlc:"Car Pass" },
+  // BMW
+  { make:"BMW", name:"1957 BMW Isetta 300 Export", type:"Cult Cars", classNum:100, cls:"D", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"1973 BMW 2002 Turbo", type:"Classic Sports Cars", classNum:424, cls:"C", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"1981 BMW M1", type:"Retro Supercars", classNum:510, cls:"B", country:"Germany", src:"Collection Journal", dlc:"" },
+  { make:"BMW", name:"1988 BMW M3", type:"Retro Super Saloons", classNum:474, cls:"C", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"1988 BMW M5", type:"Retro Super Saloons", classNum:470, cls:"C", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"1995 BMW 850CSi", type:"Retro Sports Cars", classNum:493, cls:"C", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"1995 BMW M5", type:"Retro Super Saloons", classNum:516, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"1997 BMW M3", type:"Retro Super Saloons", classNum:549, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2003 BMW M5", type:"Retro Super Saloons", classNum:580, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2005 BMW M3", type:"Retro Super Saloons", classNum:554, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2008 BMW M3", type:"Modern Super Saloons", classNum:608, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2008 BMW Z4 M Coupé", type:"Modern Sports Cars", classNum:579, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2009 BMW M5", type:"Modern Super Saloons", classNum:595, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2010 BMW M3 GTS", type:"Track Toys", classNum:678, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2011 BMW X5 M", type:"Sports Utility Heroes", classNum:546, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2012 BMW M5", type:"Modern Super Saloons", classNum:652, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2014 BMW M4 Coupé", type:"Modern Super Saloons", classNum:679, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2015 BMW i8", type:"Modern Sports Cars", classNum:665, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2016 BMW M4 GTS", type:"Track Toys", classNum:711, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2019 BMW Z4 Roadster", type:"Modern Sports Cars", classNum:634, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2020 BMW M2 Competition Coupé", type:"Modern Super Saloons", classNum:656, cls:"A", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"BMW", name:"2020 BMW M8 Competition Coupé", type:"GT Cars", classNum:684, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2021 BMW M4 Competition Coupé", type:"Modern Super Saloons", classNum:666, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2021 BMW M4 Competition Coupé Welcome Pack", type:"Modern Super Saloons", classNum:800, cls:"S1", country:"Germany", src:"DLC", dlc:"Welcome Pack" },
+  { make:"BMW", name:"2022 BMW iX xDrive50", type:"Sports Utility Heroes", classNum:595, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2022 BMW M5 CS", type:"Modern Super Saloons", classNum:731, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2023 BMW M2", type:"Modern Super Saloons", classNum:647, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"BMW", name:"2023 BMW M2 Forza Edition", type:"Track Toys", classNum:700, cls:"A", country:"Germany", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"BMW", name:"2024 BMW X6 M Competition", type:"Sports Utility Heroes", classNum:672, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  // Chevrolet
+  { make:"Chevrolet", name:"1953 Chevrolet Corvette", type:"Classic Sports Cars", classNum:270, cls:"D", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1955 Chevrolet 150 Utility Sedan", type:"Rods and Customs", classNum:221, cls:"D", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1957 Chevrolet Bel Air", type:"Rods and Customs", classNum:320, cls:"D", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1960 Chevrolet Corvette", type:"Classic Sports Cars", classNum:428, cls:"C", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Chevrolet", name:"1964 Chevrolet Impala Super Sport 409", type:"Rods and Customs", classNum:427, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1967 Chevrolet Corvette Stingray 427", type:"Classic Muscle", classNum:510, cls:"B", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Chevrolet", name:"1969 Chevrolet Camaro Super Sport Coupe", type:"Classic Muscle", classNum:471, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1969 Chevrolet Nova Super Sport 396", type:"Classic Muscle", classNum:431, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1970 Chevrolet Camaro Z28", type:"Classic Muscle", classNum:430, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1970 Chevrolet Chevelle Super Sport 454", type:"Classic Muscle", classNum:424, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1970 Chevrolet Corvette ZR-1", type:"Classic Muscle", classNum:497, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"1995 Chevrolet Corvette ZR-1", type:"Retro Muscle", classNum:576, cls:"B", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2002 Chevrolet Corvette Z06", type:"Retro Muscle", classNum:602, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2009 Chevrolet Corvette ZR1", type:"Modern Muscle", classNum:712, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2015 Chevrolet Camaro Z/28", type:"Track Toys", classNum:695, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2015 Chevrolet Corvette Z06", type:"Modern Muscle", classNum:755, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2017 Chevrolet Camaro ZL1", type:"Modern Muscle", classNum:727, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2018 Chevrolet Camaro ZL1 1LE", type:"Track Toys", classNum:728, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2019 Chevrolet Corvette ZR1", type:"Track Toys", classNum:778, cls:"S1", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Chevrolet", name:"2020 Chevrolet Corvette Stingray Coupe", type:"Modern Supercars", classNum:700, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2023 Chevrolet Corvette Z06", type:"Track Toys", classNum:763, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Chevrolet", name:"2024 Chevrolet Corvette E-Ray", type:"Modern Supercars", classNum:737, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  // Datsun
+  { make:"Datsun", name:"1969 Datsun 2000 Roadster", type:"Classic Sports Cars", classNum:323, cls:"D", country:"Japan", src:"Seasonal", dlc:"" },
+  { make:"Datsun", name:"1970 Datsun 510", type:"Classic Sports Cars", classNum:143, cls:"D", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Datsun", name:"1972 Datsun 240Z All Carbon Hill Climb Beast", type:"Extreme Track Toys", classNum:951, cls:"R", country:"Japan", src:"DLC", dlc:"Car Pass" },
+  // DeBerti
+  { make:"DeBerti", name:"2018 DeBerti Chevrolet Silverado Drift Truck", type:"Drift Cars", classNum:707, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"DeBerti", name:"2019 DeBerti Toyota Tacoma TRD Performance Truck", type:"Drift Cars", classNum:717, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  // DeLorean
+  { make:"DeLorean", name:"1982 DeLorean DMC-12", type:"Retro Sports Cars", classNum:357, cls:"D", country:"USA", src:"Autoshow", dlc:"" },
+  // Dodge
+  { make:"Dodge", name:"1968 Dodge Dart HEMI Super Stock", type:"Classic Muscle", classNum:540, cls:"B", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Dodge", name:"1969 Dodge Charger Daytona HEMI", type:"Classic Muscle", classNum:479, cls:"C", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Dodge", name:"1969 Dodge Charger R/T", type:"Classic Muscle", classNum:417, cls:"C", country:"USA", src:"Collection Journal", dlc:"" },
+  { make:"Dodge", name:"1970 Dodge Challenger R/T", type:"Classic Muscle", classNum:443, cls:"C", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Dodge", name:"1999 Dodge Viper GTS ACR", type:"Retro Muscle", classNum:598, cls:"B", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Dodge", name:"1999 Dodge Viper GTS ACR Forza Edition", type:"Unlimited Offroad", classNum:700, cls:"A", country:"USA", src:"DLC", dlc:"VIP / Forza Edition" },
+  { make:"Dodge", name:"2008 Dodge Viper SRT-10 ACR", type:"Track Toys", classNum:735, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Dodge", name:"2015 Dodge Challenger SRT Hellcat", type:"Modern Muscle", classNum:631, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Dodge", name:"2015 Dodge Charger SRT Hellcat", type:"Modern Muscle", classNum:637, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Dodge", name:"2016 Dodge Viper ACR", type:"Track Toys", classNum:786, cls:"S1", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Dodge", name:"2018 Dodge Challenger SRT Demon", type:"Modern Muscle", classNum:678, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Dodge", name:"2022 Dodge Challenger SRT Super Stock", type:"Modern Muscle", classNum:695, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  // Ferrari
+  { make:"Ferrari", name:"1962 Ferrari 250 GT Berlinetta Lusso", type:"Rare Classics", classNum:475, cls:"C", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"1962 Ferrari 250 GTO", type:"Classic Racers", classNum:494, cls:"C", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"1967 Ferrari 330 P4", type:"Classic Racers", classNum:684, cls:"A", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"1987 Ferrari F40", type:"Retro Supercars", classNum:678, cls:"A", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"1989 Ferrari F40 Competizione", type:"Retro Racers", classNum:948, cls:"R", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"1992 Ferrari 512 TR", type:"Retro Supercars", classNum:615, cls:"A", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Ferrari", name:"1994 Ferrari F355 Berlinetta", type:"Retro Supercars", classNum:588, cls:"B", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Ferrari", name:"1995 Ferrari F50", type:"Retro Supercars", classNum:678, cls:"A", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"1996 Ferrari F50 GT", type:"Extreme Track Toys", classNum:949, cls:"R", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Ferrari", name:"2002 Ferrari Enzo Ferrari", type:"Retro Supercars", classNum:755, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2005 Ferrari FXX", type:"Extreme Track Toys", classNum:900, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2007 Ferrari 430 Scuderia", type:"Modern Supercars", classNum:702, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2009 Ferrari 458 Italia", type:"Modern Supercars", classNum:721, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2010 Ferrari 599XX", type:"Extreme Track Toys", classNum:840, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2012 Ferrari 599XX Evolution", type:"Extreme Track Toys", classNum:894, cls:"S2", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Ferrari", name:"2013 Ferrari 458 Speciale", type:"Track Toys", classNum:768, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2013 Ferrari LaFerrari", type:"Hypercars", classNum:857, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2014 Ferrari FXX K", type:"Extreme Track Toys", classNum:936, cls:"R", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2015 Ferrari 488 GTB", type:"Modern Supercars", classNum:770, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2015 Ferrari F12tdf", type:"Super GT", classNum:788, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2017 Ferrari 812 Superfast", type:"Super GT", classNum:780, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2017 Ferrari J50", type:"Modern Supercars", classNum:772, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2017 Ferrari J50 Preorder Car", type:"Modern Supercars", classNum:800, cls:"S1", country:"Italy", src:"DLC", dlc:"Preorder Bonus" },
+  { make:"Ferrari", name:"2018 Ferrari FXX-K Evo", type:"Extreme Track Toys", classNum:957, cls:"R", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2018 Ferrari FXX-K Evo Welcome Pack", type:"Extreme Track Toys", classNum:998, cls:"R", country:"Italy", src:"DLC", dlc:"Welcome Pack" },
+  { make:"Ferrari", name:"2018 Ferrari Portofino", type:"Super GT", classNum:714, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2019 Ferrari 488 Pista", type:"Track Toys", classNum:803, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2019 Ferrari F8 Tributo", type:"Modern Supercars", classNum:802, cls:"S2", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Ferrari", name:"2019 Ferrari Monza SP2", type:"Super GT", classNum:773, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2020 Ferrari Roma", type:"Super GT", classNum:735, cls:"S1", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Ferrari", name:"2020 Ferrari SF90 Stradale", type:"Hypercars", classNum:851, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Ferrari", name:"2022 Ferrari 296 GTB", type:"Modern Supercars", classNum:811, cls:"S2", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Ferrari", name:"2025 Ferrari F80", type:"Hypercars", classNum:920, cls:"R", country:"Italy", src:"DLC", dlc:"Italian Passion Car Pack" },
+  // Ford
+  { make:"Ford", name:"1965 Ford Mustang GT Coupe", type:"Classic Muscle", classNum:388, cls:"D", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"1966 Ford GT40 Mk II", type:"Classic Racers", classNum:666, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"1968 Ford Mustang GT 2+2 Fastback", type:"Classic Muscle", classNum:394, cls:"D", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"1968 Ford Mustang GT 2+2 Fastback Forza Edition", type:"Drift Cars", classNum:700, cls:"A", country:"USA", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"Ford", name:"1985 Ford RS200 Evolution", type:"Rally Monsters", classNum:710, cls:"S1", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Ford", name:"1986 Ford F-150 XLT Lariat", type:"Pickups & 4x4's", classNum:263, cls:"D", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"1986 Ford F-150 XLT Lariat Forza Edition", type:"Drift Cars", classNum:850, cls:"S2", country:"USA", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"Ford", name:"2001 Ford Focus RS Rally Monster", type:"Rally Monsters", classNum:639, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"2005 Ford GT", type:"Retro Supercars", classNum:676, cls:"A", country:"USA", src:"Collection Journal", dlc:"" },
+  { make:"Ford", name:"2013 Ford Mustang Shelby GT500", type:"Modern Muscle", classNum:647, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"2016 Ford Mustang Shelby GT350R", type:"Track Toys", classNum:721, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"2017 Ford GT", type:"Modern Supercars", classNum:757, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"2020 Ford Mustang Shelby GT500", type:"Modern Muscle", classNum:734, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"2020 Ford Super Duty F-450 Forza Edition", type:"Pickups & 4x4's", classNum:700, cls:"A", country:"USA", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"Ford", name:"2022 Ford Supervan 4", type:"Extreme Track Toys", classNum:919, cls:"R", country:"USA", src:"Seasonal", dlc:"" },
+  { make:"Ford", name:"2024 Ford Mustang Dark Horse", type:"Modern Muscle", classNum:669, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Ford", name:"2024 Ford Mustang GT", type:"Modern Muscle", classNum:628, cls:"A", country:"USA", src:"Autoshow", dlc:"" },
+  // Formula Drift
+  { make:"Formula Drift", name:"1989 Formula Drift #98 BMW 325i", type:"Drift Cars", classNum:726, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Formula Drift", name:"1995 Formula Drift #34 Toyota Supra MkIV", type:"Drift Cars", classNum:759, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Formula Drift", name:"1997 Formula Drift #777 Nissan 240SX", type:"Drift Cars", classNum:748, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Formula Drift", name:"2007 Formula Drift #117 Ferrari 599 GTB", type:"Drift Cars", classNum:767, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Formula Drift", name:"2009 Formula Drift #99 Mazda RX-8", type:"Drift Cars", classNum:737, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Formula Drift", name:"2013 Formula Drift #777 Chevrolet Corvette", type:"Drift Cars", classNum:760, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Formula Drift", name:"2020 Formula Drift #151 Toyota GR Supra", type:"Drift Cars", classNum:779, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  { make:"Formula Drift", name:"2023 Formula Drift #64 Nissan Z", type:"Drift Cars", classNum:783, cls:"S1", country:"USA", src:"Autoshow", dlc:"" },
+  // Honda
+  { make:"Honda", name:"1992 Honda NSX-R", type:"Retro Sports Cars", classNum:572, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"1997 Honda Civic Type R", type:"Retro Hot Hatch", classNum:430, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"2003 Honda S2000", type:"Modern Sports Cars", classNum:503, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"2004 Honda Civic Type R", type:"Retro Hot Hatch", classNum:480, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"2005 Honda NSX-R", type:"Retro Sports Cars", classNum:570, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"2007 Honda Civic Type R", type:"Hot Hatch", classNum:454, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"2015 Honda Civic Type R", type:"Super Hot Hatch", classNum:585, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"2018 Honda Civic Type R", type:"Super Hot Hatch", classNum:608, cls:"A", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"2023 Honda Civic Type R", type:"Super Hot Hatch", classNum:620, cls:"A", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Honda", name:"1990 Honda CRX WTAC", type:"Extreme Track Toys", classNum:877, cls:"S2", country:"Japan", src:"DLC", dlc:"Time Attack Car Pack" },
+  { make:"Honda", name:"1992 Honda Civic WTAC", type:"Extreme Track Toys", classNum:913, cls:"R", country:"Japan", src:"DLC", dlc:"Time Attack Car Pack" },
+  { make:"Honda", name:"2001 Honda Integra WTAC", type:"Extreme Track Toys", classNum:860, cls:"S2", country:"Japan", src:"DLC", dlc:"Time Attack Car Pack" },
+  { make:"Honda", name:"2004 Honda S2000 WTAC", type:"Extreme Track Toys", classNum:888, cls:"S2", country:"Japan", src:"DLC", dlc:"Time Attack Car Pack" },
+  // Hyundai
+  { make:"Hyundai", name:"2019 Hyundai Veloster N", type:"Super Hot Hatch", classNum:532, cls:"B", country:"Korea", src:"Autoshow", dlc:"" },
+  { make:"Hyundai", name:"2020 Hyundai i30 N", type:"Super Hot Hatch", classNum:553, cls:"B", country:"Korea", src:"Autoshow", dlc:"" },
+  { make:"Hyundai", name:"2021 Hyundai i20 N", type:"Hot Hatch", classNum:564, cls:"B", country:"Korea", src:"Autoshow", dlc:"" },
+  { make:"Hyundai", name:"2022 Hyundai N Vision 74", type:"Track Toys", classNum:692, cls:"A", country:"Korea", src:"Autoshow", dlc:"" },
+  { make:"Hyundai", name:"2023 Hyundai IONIQ 5 N", type:"Sports Utility Heroes", classNum:657, cls:"A", country:"Korea", src:"Autoshow", dlc:"" },
+  // Jaguar
+  { make:"Jaguar", name:"1956 Jaguar D-Type", type:"Classic Racers", classNum:506, cls:"B", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Jaguar", name:"1964 Jaguar Lightweight E-Type", type:"Classic Racers", classNum:568, cls:"B", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Jaguar", name:"1991 Jaguar Sport XJR-15", type:"Retro Supercars", classNum:716, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Jaguar", name:"1993 Jaguar XJ220", type:"Retro Supercars", classNum:676, cls:"A", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Jaguar", name:"1993 Jaguar XJ220S TWR", type:"Retro Supercars", classNum:750, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Jaguar", name:"2010 Jaguar C-X75", type:"Modern Supercars", classNum:810, cls:"S2", country:"UK", src:"Autoshow", dlc:"" },
+  // Koenigsegg
+  { make:"Koenigsegg", name:"2011 Koenigsegg Agera", type:"Hypercars", classNum:810, cls:"S2", country:"Sweden", src:"Autoshow", dlc:"" },
+  { make:"Koenigsegg", name:"2015 Koenigsegg One:1", type:"Hypercars", classNum:890, cls:"S2", country:"Sweden", src:"Seasonal", dlc:"" },
+  { make:"Koenigsegg", name:"2016 Koenigsegg Regera", type:"Hypercars", classNum:886, cls:"S2", country:"Sweden", src:"Autoshow", dlc:"" },
+  { make:"Koenigsegg", name:"2017 Koenigsegg Agera RS", type:"Hypercars", classNum:890, cls:"S2", country:"Sweden", src:"Autoshow", dlc:"" },
+  { make:"Koenigsegg", name:"2020 Koenigsegg Jesko", type:"Hypercars", classNum:899, cls:"S2", country:"Sweden", src:"Autoshow", dlc:"" },
+  { make:"Koenigsegg", name:"2024 Koenigsegg Gemera", type:"Hypercars", classNum:900, cls:"S2", country:"Sweden", src:"DLC", dlc:"Car Pass" },
+  // Lamborghini
+  { make:"Lamborghini", name:"1967 Lamborghini Miura P400", type:"Rare Classics", classNum:505, cls:"B", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"1988 Lamborghini Countach LP5000 QV", type:"Retro Supercars", classNum:622, cls:"A", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Lamborghini", name:"1997 Lamborghini Diablo SV", type:"Retro Supercars", classNum:649, cls:"A", country:"Italy", src:"Collection Journal", dlc:"" },
+  { make:"Lamborghini", name:"1999 Lamborghini Diablo GTR", type:"Extreme Track Toys", classNum:823, cls:"S2", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Lamborghini", name:"2010 Lamborghini Murciélago LP 670-4 SV", type:"Modern Supercars", classNum:707, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2011 Lamborghini Sesto Elemento", type:"Extreme Track Toys", classNum:871, cls:"S2", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Lamborghini", name:"2012 Lamborghini Aventador LP700-4", type:"Hypercars", classNum:753, cls:"S1", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Lamborghini", name:"2012 Lamborghini Gallardo LP570-4 Spyder Performante", type:"Modern Supercars", classNum:685, cls:"A", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2013 Lamborghini Veneno", type:"Hypercars", classNum:834, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2014 Lamborghini Huracán LP 610-4", type:"Modern Supercars", classNum:738, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2016 Lamborghini Centenario LP 770-4", type:"Hypercars", classNum:792, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2018 Lamborghini Aventador SVJ", type:"Hypercars", classNum:794, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2019 Lamborghini Urus", type:"Sports Utility Heroes", classNum:659, cls:"A", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2020 Lamborghini Essenza SCV12", type:"Extreme Track Toys", classNum:911, cls:"R", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2020 Lamborghini Huracán EVO", type:"Modern Supercars", classNum:761, cls:"S1", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Lamborghini", name:"2020 Lamborghini Huracán STO", type:"Track Toys", classNum:783, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2020 Lamborghini Sián Roadster", type:"Hypercars", classNum:797, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2021 Lamborghini Countach LPI 800-4", type:"Hypercars", classNum:773, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2022 Lamborghini Aventador LP 780-4 Ultimae", type:"Hypercars", classNum:794, cls:"S1", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Lamborghini", name:"2022 Lamborghini Huracán Sterrato", type:"Rally Monsters", classNum:738, cls:"S1", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Lamborghini", name:"2022 Lamborghini Huracán Tecnica", type:"Modern Supercars", classNum:747, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Lamborghini", name:"2024 Lamborghini Revuelto", type:"Hypercars", classNum:829, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  // Lotus
+  { make:"Lotus", name:"1997 Lotus Elise GT1", type:"Retro Supercars", classNum:709, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Lotus", name:"1999 Lotus Elise Series 1 Sport 190", type:"Retro Sports Cars", classNum:589, cls:"B", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Lotus", name:"2018 Lotus Exige Cup 430", type:"Track Toys", classNum:732, cls:"S1", country:"UK", src:"Seasonal", dlc:"" },
+  { make:"Lotus", name:"2018 Lotus Scura Motorsports Exige WTAC", type:"Extreme Track Toys", classNum:998, cls:"R", country:"UK", src:"Seasonal", dlc:"" },
+  { make:"Lotus", name:"2020 Lotus Evija", type:"Hypercars", classNum:937, cls:"R", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"Lotus", name:"2020 Lotus Evija Forza Edition", type:"Drift Cars", classNum:900, cls:"S2", country:"UK", src:"DLC", dlc:"VIP / Forza Edition" },
+  { make:"Lotus", name:"2023 Lotus Emira", type:"Modern Sports Cars", classNum:656, cls:"A", country:"UK", src:"Seasonal", dlc:"" },
+  // Lucid
+  { make:"Lucid", name:"2024 Lucid Air Sapphire", type:"Modern Super Saloons", classNum:820, cls:"S2", country:"USA", src:"Autoshow", dlc:"" },
+  // Maserati
+  { make:"Maserati", name:"2004 Maserati MC12", type:"Retro Supercars", classNum:751, cls:"S1", country:"Italy", src:"Seasonal", dlc:"" },
+  { make:"Maserati", name:"2008 Maserati MC12 Versione Corsa", type:"Extreme Track Toys", classNum:912, cls:"R", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Maserati", name:"2022 Maserati MC20", type:"Modern Supercars", classNum:753, cls:"S1", country:"Italy", src:"Autoshow", dlc:"" },
+  // Mazda
+  { make:"Mazda", name:"1973 Mazda RX-3", type:"Classic Sports Cars", classNum:328, cls:"D", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mazda", name:"1973 Mazda RX-3 Forza Edition", type:"Classic Sports Cars", classNum:600, cls:"B", country:"Japan", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"Mazda", name:"1974 Mazda Mad Mike 808 Wagon FURSTY", type:"Drift Cars", classNum:702, cls:"S1", country:"Japan", src:"DLC", dlc:"Car Pass" },
+  { make:"Mazda", name:"1985 Mazda RX-7 GSL-SE", type:"Retro Sports Cars", classNum:357, cls:"D", country:"Japan", src:"Collection Journal", dlc:"" },
+  { make:"Mazda", name:"1990 Mazda Savanna RX-7", type:"Retro Sports Cars", classNum:451, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mazda", name:"1991 Mazda #55 787B", type:"Retro Racers", classNum:988, cls:"R", country:"Japan", src:"Collection Journal", dlc:"" },
+  { make:"Mazda", name:"1992 Mazda RX-7 Type R", type:"Retro Sports Cars", classNum:548, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mazda", name:"1994 Mazda MX-5 Miata", type:"Retro Sports Cars", classNum:329, cls:"D", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mazda", name:"1994 Mazda MX-5 Miata Forza Edition", type:"Retro Sports Cars", classNum:850, cls:"S2", country:"Japan", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"Mazda", name:"2008 Mazda Furai", type:"Extreme Track Toys", classNum:926, cls:"R", country:"Japan", src:"Seasonal", dlc:"" },
+  { make:"Mazda", name:"2011 Mazda RX-8 R3", type:"Modern Sports Cars", classNum:508, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mazda", name:"2016 Mazda MX-5", type:"Modern Sports Cars", classNum:499, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mazda", name:"2022 Mazda MX-5 Miata RF", type:"Modern Sports Cars", classNum:509, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  // McLaren
+  { make:"McLaren", name:"1993 McLaren F1", type:"Retro Supercars", classNum:713, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"1997 McLaren F1 GT", type:"Retro Supercars", classNum:769, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"2011 McLaren 12C Coupé", type:"Modern Supercars", classNum:727, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"2013 McLaren P1", type:"Hypercars", classNum:848, cls:"S2", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"2014 McLaren 650S Spider", type:"Modern Supercars", classNum:765, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"2015 McLaren 570S Coupé", type:"Modern Supercars", classNum:721, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"2018 McLaren 600LT Coupé", type:"Track Toys", classNum:780, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"2019 McLaren Speedtail", type:"Hypercars", classNum:835, cls:"S2", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"2021 McLaren 765LT Coupé", type:"Track Toys", classNum:829, cls:"S2", country:"UK", src:"Autoshow", dlc:"" },
+  { make:"McLaren", name:"2021 McLaren Sabre", type:"Hypercars", classNum:787, cls:"S1", country:"UK", src:"Seasonal", dlc:"" },
+  { make:"McLaren", name:"2023 McLaren Artura", type:"Modern Supercars", classNum:766, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  // Mercedes-AMG / Mercedes-Benz
+  { make:"Mercedes-AMG", name:"2015 Mercedes-AMG GT S", type:"Super GT", classNum:691, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Mercedes-AMG", name:"2017 Mercedes-AMG GT R", type:"Super GT", classNum:764, cls:"S1", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Mercedes-AMG", name:"2020 Mercedes-AMG GT Black Series", type:"Track Toys", classNum:782, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Mercedes-AMG", name:"2020 Mercedes-AMG GT Black Series Welcome Pack", type:"Track Toys", classNum:900, cls:"S2", country:"Germany", src:"DLC", dlc:"Welcome Pack" },
+  { make:"Mercedes-AMG", name:"2021 Mercedes-AMG ONE", type:"Hypercars", classNum:900, cls:"S2", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Mercedes-Benz", name:"1954 Mercedes-Benz 300 SL Coupé", type:"Rare Classics", classNum:388, cls:"D", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Mercedes-Benz", name:"1955 Mercedes-Benz 300 SLR", type:"Classic Racers", classNum:599, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Mercedes-Benz", name:"1998 Mercedes-Benz AMG CLK GTR", type:"Retro Supercars", classNum:713, cls:"S1", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Mercedes-Benz", name:"1990 Mercedes-Benz 190 E 2.5-16 Evo II Forza Edition", type:"Track Toys", classNum:700, cls:"A", country:"Germany", src:"Seasonal", dlc:"Forza Edition" },
+  // Mitsubishi
+  { make:"Mitsubishi", name:"1992 Mitsubishi Galant VR-4", type:"Retro Rally", classNum:431, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mitsubishi", name:"1995 Mitsubishi Eclipse GSX", type:"Retro Sports Cars", classNum:436, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mitsubishi", name:"1995 Mitsubishi Lancer Evolution III GSR", type:"Retro Rally", classNum:518, cls:"B", country:"Japan", src:"Collection Journal", dlc:"" },
+  { make:"Mitsubishi", name:"2004 Mitsubishi Lancer Evolution VIII MR", type:"Modern Rally", classNum:555, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Mitsubishi", name:"2004 Mitsubishi Lancer Evolution VIII MR Welcome Pack", type:"Modern Rally", classNum:700, cls:"A", country:"Japan", src:"DLC", dlc:"Welcome Pack" },
+  { make:"Mitsubishi", name:"2008 Mitsubishi Lancer Evolution X GSR", type:"Modern Rally", classNum:534, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  // Nissan
+  { make:"Nissan", name:"1973 Nissan Skyline H/T 2000GT-R", type:"Classic Sports Cars", classNum:407, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"1987 Nissan Skyline GTS-R", type:"Retro Sports Cars", classNum:432, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"1989 Nissan Silvia K's", type:"Retro Sports Cars", classNum:455, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"1990 Nissan Skyline GT-R (BNR32) Group A", type:"Retro Racers", classNum:858, cls:"S2", country:"Japan", src:"DLC", dlc:"Car Pass" },
+  { make:"Nissan", name:"1992 Nissan Skyline GT-R", type:"Retro Sports Cars", classNum:541, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"1993 Nissan Skyline WTAC Xtreme GTR", type:"Extreme Track Toys", classNum:923, cls:"R", country:"Japan", src:"DLC", dlc:"Time Attack Car Pack" },
+  { make:"Nissan", name:"1994 Nissan Fairlady Z Version S Twin Turbo", type:"Retro Sports Cars", classNum:497, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"1994 Nissan Silvia K's", type:"Retro Sports Cars", classNum:499, cls:"C", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"1997 Nissan Skyline GT-R V-Spec", type:"Retro Sports Cars", classNum:555, cls:"B", country:"Japan", src:"Seasonal", dlc:"" },
+  { make:"Nissan", name:"1998 Nissan Skyline GT-R 40th Anniversary", type:"Retro Sports Cars", classNum:547, cls:"B", country:"Japan", src:"DLC", dlc:"Car Pass" },
+  { make:"Nissan", name:"2000 Nissan S15 Silvia WTAC", type:"Extreme Track Toys", classNum:996, cls:"R", country:"Japan", src:"DLC", dlc:"Time Attack Car Pack" },
+  { make:"Nissan", name:"2000 Nissan Skyline GT-R V Spec II", type:"Retro Sports Cars", classNum:590, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"2002 Nissan Silvia Spec-R", type:"Retro Sports Cars", classNum:551, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"2003 Nissan Fairlady Z", type:"Retro Sports Cars", classNum:534, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"2012 Nissan GT-R Black Edition (R35)", type:"Modern Supercars", classNum:703, cls:"S1", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"2012 Nissan GT-R Black Edition Forza Edition", type:"Extreme Track Toys", classNum:850, cls:"S2", country:"Japan", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"Nissan", name:"2017 Nissan GT-R (R35)", type:"Modern Supercars", classNum:709, cls:"S1", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"2019 Nissan 370Z Nismo", type:"Modern Sports Cars", classNum:603, cls:"A", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"2020 Nissan GT-R NISMO (R35)", type:"Track Toys", classNum:736, cls:"S1", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"2024 Nissan GT-R Nismo", type:"Track Toys", classNum:741, cls:"S1", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Nissan", name:"2024 Nissan Z NISMO", type:"Modern Sports Cars", classNum:652, cls:"A", country:"Japan", src:"Autoshow", dlc:"" },
+  // Noble
+  { make:"Noble", name:"2010 Noble M600", type:"Modern Supercars", classNum:793, cls:"S1", country:"UK", src:"Autoshow", dlc:"" },
+  // Pagani
+  { make:"Pagani", name:"2009 Pagani Zonda R", type:"Extreme Track Toys", classNum:918, cls:"R", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Pagani", name:"2010 Pagani Zonda Cinque Roadster", type:"Hypercars", classNum:812, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Pagani", name:"2016 Pagani Huayra BC Coupe", type:"Hypercars", classNum:851, cls:"S2", country:"Italy", src:"Autoshow", dlc:"" },
+  { make:"Pagani", name:"2021 Pagani Huayra R", type:"Extreme Track Toys", classNum:954, cls:"R", country:"Italy", src:"Seasonal", dlc:"" },
+  // Porsche
+  { make:"Porsche", name:"1970 Porsche 917 LH", type:"Classic Racers", classNum:777, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"1970 Porsche 917 LH Forza Edition", type:"Extreme Track Toys", classNum:998, cls:"R", country:"Germany", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"Porsche", name:"1973 Porsche 911 Carrera RS", type:"Rare Classics", classNum:490, cls:"C", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"1982 Porsche 911 Turbo 3.3", type:"Retro Supercars", classNum:550, cls:"B", country:"Germany", src:"Collection Journal", dlc:"" },
+  { make:"Porsche", name:"1987 Porsche 959", type:"Retro Supercars", classNum:661, cls:"A", country:"Germany", src:"Collection Journal", dlc:"" },
+  { make:"Porsche", name:"1989 Porsche 944 Turbo", type:"Retro Sports Cars", classNum:539, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"1993 Porsche 911 Turbo S Leichtbau", type:"Retro Sports Cars", classNum:652, cls:"A", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Porsche", name:"1995 Porsche 911 GT2", type:"Retro Supercars", classNum:644, cls:"A", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Porsche", name:"1997 Porsche 911 GT1 Strassenversion", type:"Retro Supercars", classNum:746, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2003 Porsche Carrera GT", type:"Retro Supercars", classNum:758, cls:"S1", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Porsche", name:"2004 Porsche 911 GT3", type:"Retro Supercars", classNum:674, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2005 Porsche Cayman GT3 WTAC", type:"Extreme Track Toys", classNum:856, cls:"S2", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2012 Porsche 911 GT3 RS 4.0", type:"Track Toys", classNum:726, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2014 Porsche 918 Spyder", type:"Hypercars", classNum:858, cls:"S2", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2018 Porsche 718 Cayman GTS", type:"Modern Sports Cars", classNum:675, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2018 Porsche 911 GT2 RS", type:"Track Toys", classNum:803, cls:"S2", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2019 Porsche 911 Carrera S", type:"Modern Sports Cars", classNum:714, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2019 Porsche 911 GT3 RS", type:"Track Toys", classNum:760, cls:"S1", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Porsche", name:"2019 Porsche 935", type:"Extreme Track Toys", classNum:853, cls:"S2", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2020 Porsche Taycan Turbo S", type:"Modern Super Saloons", classNum:725, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2021 Porsche 911 GT3", type:"Track Toys", classNum:752, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2021 Porsche Mission R", type:"Extreme Track Toys", classNum:865, cls:"S2", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2022 Porsche 718 Cayman GT4 RS", type:"Track Toys", classNum:737, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2023 Porsche 911 GT3 RS", type:"Track Toys", classNum:758, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Porsche", name:"2023 Porsche 911 Rallye", type:"Rally Monsters", classNum:700, cls:"A", country:"Germany", src:"Seasonal", dlc:"" },
+  { make:"Porsche", name:"2023 Porsche 911 Turbo S", type:"Modern Supercars", classNum:774, cls:"S1", country:"Germany", src:"Autoshow", dlc:"" },
+  // Radical
+  { make:"Radical", name:"2015 Radical RXC Turbo", type:"Extreme Track Toys", classNum:842, cls:"S2", country:"UK", src:"Autoshow", dlc:"" },
+  // Rimac
+  { make:"Rimac", name:"2021 Rimac Nevera", type:"Hypercars", classNum:913, cls:"R", country:"Croatia", src:"Seasonal", dlc:"" },
+  // Toyota/GR/Lexus
+  { make:"Toyota", name:"1998 Toyota Supra RZ", type:"Retro Sports Cars", classNum:543, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Toyota", name:"2020 Toyota GR Supra", type:"Modern Sports Cars", classNum:644, cls:"A", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Toyota", name:"2020 Toyota GR Yaris", type:"Hot Hatch", classNum:532, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Toyota", name:"2022 Toyota GR86", type:"Modern Sports Cars", classNum:573, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Toyota", name:"2023 Toyota GR Corolla", type:"Hot Hatch", classNum:573, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"GR", name:"2025 GR GT Prototype", type:"Super GT", classNum:771, cls:"S1", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Lexus", name:"2010 Lexus LFA", type:"Modern Supercars", classNum:699, cls:"A", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Lexus", name:"2010 Lexus LFA Forza Edition", type:"Extreme Track Toys", classNum:900, cls:"S2", country:"Japan", src:"Seasonal", dlc:"Forza Edition" },
+  { make:"Lexus", name:"2015 Lexus RC F", type:"Modern Super Saloons", classNum:623, cls:"A", country:"Japan", src:"Autoshow", dlc:"" },
+  // Subaru
+  { make:"Subaru", name:"1998 Subaru Impreza 22B STi", type:"Retro Rally", classNum:543, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Subaru", name:"2005 Subaru Impreza WRX STI", type:"Modern Rally", classNum:551, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Subaru", name:"2011 Subaru WRX STI", type:"Modern Rally", classNum:560, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Subaru", name:"2021 Subaru WRX STI S209", type:"Modern Rally", classNum:601, cls:"A", country:"Japan", src:"Autoshow", dlc:"" },
+  { make:"Subaru", name:"2022 Subaru BRZ", type:"Modern Sports Cars", classNum:548, cls:"B", country:"Japan", src:"Autoshow", dlc:"" },
+  // Volkswagen
+  { make:"Volkswagen", name:"1983 Volkswagen Rabbit GTI", type:"Retro Hot Hatch", classNum:397, cls:"D", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"1992 Volkswagen Golf GTI 16V", type:"Retro Hot Hatch", classNum:406, cls:"C", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"2000 Volkswagen Golf R32", type:"Retro Hot Hatch", classNum:479, cls:"C", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"2010 Volkswagen Golf R", type:"Super Hot Hatch", classNum:525, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"2013 Volkswagen Golf GTI", type:"Hot Hatch", classNum:467, cls:"C", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"2016 Volkswagen Golf R", type:"Super Hot Hatch", classNum:549, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"2016 Volkswagen Polo GTI R5", type:"Rally Monsters", classNum:649, cls:"A", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"2018 Volkswagen Golf GTI Clubsport S", type:"Super Hot Hatch", classNum:599, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"2023 Volkswagen Golf R", type:"Super Hot Hatch", classNum:572, cls:"B", country:"Germany", src:"Autoshow", dlc:"" },
+  { make:"Volkswagen", name:"1965 Volkswagen Beetle", type:"Cult Cars", classNum:222, cls:"D", country:"Germany", src:"Autoshow", dlc:"" },
+];
+const CLASS_RANGES = {
+  D: { label: "D-Class", range: [100, 500], color: "#60a5fa", bg: "rgba(96,165,250,.12)" },
+  C: { label: "C-Class", range: [501, 600], color: "#34d399", bg: "rgba(52,211,153,.12)" },
+  B: { label: "B-Class", range: [601, 700], color: "#facc15", bg: "rgba(250,204,21,.13)" },
+  A: { label: "A-Class", range: [701, 800], color: "#fb923c", bg: "rgba(251,146,60,.13)" },
+  S1: { label: "S1-Class", range: [801, 900], color: "#c084fc", bg: "rgba(192,132,252,.14)" },
+  S2: { label: "S2-Class", range: [901, 998], color: "#f472b6", bg: "rgba(244,114,182,.13)" },
+  R: { label: "R-Class", range: [800, 998], color: "#f43f5e", bg: "rgba(244,63,94,.14)" },
+};
+
+const CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R"];
+const BUILD_TYPES = ["Race", "Drift", "Top Speed", "Off-Road", "Rally"];
+
+const BUILD_META = {
+  Race: { icon: "🏁", blurb: "Balanced road-racing grip, braking stability, and corner exit speed." },
+  Drift: { icon: "💨", blurb: "Angle, throttle control, rear rotation, and predictable transitions." },
+  "Top Speed": { icon: "⚡", blurb: "Long gearing, low drag, stable aero, and maximum power priority." },
+  "Off-Road": { icon: "⛰️", blurb: "Suspension travel, traction, durability, and dirt launch control." },
+  Rally: { icon: "🌧️", blurb: "Mixed-surface grip with sharper turn-in than a full off-road build." },
+};
+
+function classColor(cls) {
+  return CLASS_RANGES[cls]?.color || "#94a3b8";
+}
+
+function nextClassesFrom(cls) {
+  const i = Math.max(0, CLASS_ORDER.indexOf(cls));
+  return CLASS_ORDER.slice(i).filter(c => c !== "R" || ["R", "S2", "S1"].includes(cls));
+}
+
+function recommendedTarget(car, build) {
+  if (build === "Drift") return car.classNum >= 800 ? "S2" : car.classNum >= 650 ? "S1" : "A";
+  if (build === "Top Speed") return car.classNum >= 850 ? "R" : car.classNum >= 700 ? "S2" : "S1";
+  if (build === "Off-Road" || build === "Rally") return car.classNum >= 720 ? "S1" : "A";
+  if (car.classNum >= 900) return "R";
+  if (car.classNum >= 760) return "S2";
+  if (car.classNum >= 620) return "S1";
+  if (car.classNum >= 500) return "A";
+  return "B";
+}
+
+function clampTarget(car, target) {
+  const options = nextClassesFrom(car.cls);
+  return options.includes(target) ? target : options[options.length - 1] || car.cls;
+}
+
+function buildOptionsFor(car) {
+  const options = nextClassesFrom(car.cls);
+  return BUILD_TYPES.flatMap(build => options.map(cls => ({ build, cls, featured: cls === clampTarget(car, recommendedTarget(car, build)) })));
+}
+
+function driveBias(car, build) {
+  const text = `${car.name} ${car.type}`.toLowerCase();
+  if (build === "Drift") return "RWD";
+  if (build === "Off-Road" || build === "Rally") return "AWD";
+  if (text.includes("buggy") || text.includes("offroad") || text.includes("rally") || text.includes("wrx") || text.includes("evolution") || text.includes("gt-r")) return "AWD";
+  if (build === "Top Speed" && car.classNum < 760) return "AWD";
+  return "Stock / RWD preferred";
+}
+
+
+const SPECIAL_RECOMMENDATIONS = {
+  "2018 Ferrari FXX-K Evo": {
+    Race: {
+      title: "Recommended: R998 All-Round Grip / Road Racing",
+      why: "This is the sweet-spot version for the FXX-K Evo: huge downforce, stable braking, and enough power to stay scary without making it slide everywhere.",
+      targetClass: "R",
+      priorities: ["Max grip and braking consistency", "Keep AWD off unless you specifically want easier launches", "Race slicks + full aero + race weight reduction", "Use throttle discipline in 1st/2nd; it has more grip than most cars but still a lot of torque"],
+      bestFor: "Road racing, circuits with medium/high-speed corners, clean rivals laps, and all-around hypercar events."
+    },
+    "Top Speed": {
+      title: "Recommended: R998 High-Speed Grip",
+      why: "Keeps the car planted while stretching the gearing for long straights. It is not as slippery as a pure speed-trap tune, but it is much easier to control.",
+      targetClass: "R",
+      priorities: ["Minimum front aero only if the car stays stable", "Rear aero slightly above minimum", "Lengthen 5th/6th until it pulls cleanly at top end", "Avoid over-soft rear springs; stability matters more than launch"],
+      bestFor: "High-speed circuits, highway pulls, speed zones, and tracks where you still need cornering."
+    },
+    Drift: {
+      title: "Recommended: S2 Controlled Power Drift",
+      why: "The FXX-K Evo has so much aero and grip that a drift build should focus on making rotation predictable instead of chasing maximum power.",
+      targetClass: "S2",
+      priorities: ["RWD conversion if available/preferred", "Drift tires, drift suspension, drift differential", "Higher rear tire pressure and softer front ARB", "Use manual gears and avoid over-long gearing"],
+      bestFor: "Style drifting, wide drift zones, and learning throttle-based rotation in a high-power car."
+    },
+    Rally: {
+      title: "Recommended: S1/S2 Experimental Rally Grip",
+      why: "This is not the natural home for the FXX-K Evo, so the goal is controllability: soften it, raise it, and bias the diff for traction.",
+      targetClass: "S2",
+      priorities: ["AWD if available", "Rally tires and rally suspension", "Raise ride height and soften damping", "Reduce aero if it bottoms out over bumps"],
+      bestFor: "Fun mixed-surface builds, not meta dirt racing."
+    },
+    "Off-Road": {
+      title: "Recommended: S1/S2 Fun Off-Road Conversion",
+      why: "Use this as a novelty build. The car is naturally a track monster, so prioritize tire compliance and ride height over raw speed.",
+      targetClass: "S2",
+      priorities: ["AWD if available", "Off-road tires", "Rally/off-road suspension", "Soft springs, high ride height, and lower diff accel"],
+      bestFor: "Freeroam dirt, jumps, and playful off-road routes."
+    }
+  }
+};
+
+function getBuildRecommendation(car, build, targetClass) {
+  const special = SPECIAL_RECOMMENDATIONS[car.name]?.[build];
+  if (special) return special;
+  const text = `${car.name} ${car.type}`.toLowerCase();
+  const isTrack = text.includes("track") || text.includes("extreme") || text.includes("racer") || text.includes("hypercar") || text.includes("supercar");
+  const isRally = text.includes("rally") || text.includes("wrx") || text.includes("evolution") || text.includes("offroad") || text.includes("buggy");
+  const isMuscle = text.includes("muscle") || text.includes("mustang") || text.includes("challenger") || text.includes("charger") || text.includes("camaro") || text.includes("corvette");
+  const target = targetClass || clampTarget(car, recommendedTarget(car, build));
+  const base = {
+    Race: {
+      title: `Recommended: ${target} All-Around Grip Race`,
+      why: isTrack ? "This car already wants to corner, so the best all-around build leans into grip, braking, and aero instead of only adding power." : isMuscle ? "This keeps the muscle-car power but adds the tire, brake, and suspension control needed for clean racing." : "This is the safest fast build: balanced grip, braking stability, and enough power to be useful on most routes.",
+      priorities: ["Tire compound first", "Weight reduction before huge power", "Adjustable aero when available", "Rear-biased diff for rotation without snapping"],
+      bestFor: "Road racing, sprint events, circuits, rivals practice, and general use."
+    },
+    Drift: {
+      title: `Recommended: ${target} Smooth Drift Setup`,
+      why: "This build favors angle and predictable transitions instead of a chaotic max-power slide setup.",
+      priorities: ["RWD behavior", "Drift tires and drift suspension", "High rear diff acceleration", "Manual gears for throttle control"],
+      bestFor: "Drift zones, style runs, and learning consistent transitions."
+    },
+    "Top Speed": {
+      title: `Recommended: ${target} Stable Top-Speed Build`,
+      why: "This is for long straights without making the car impossible to steer when the road bends.",
+      priorities: ["Power upgrades after tires/drivetrain", "Long final drive", "Low drag aero", "Enough rear stability to stop wandering"],
+      bestFor: "Highway pulls, speed traps, speed zones, and fast sprint routes."
+    },
+    "Off-Road": {
+      title: `Recommended: ${target} Traction Off-Road Build`,
+      why: isRally ? "This car already fits dirt/mixed-surface driving, so the best build maximizes traction and keeps suspension travel usable." : "This conversion is best as a stable all-terrain setup rather than a pure road-speed build.",
+      priorities: ["AWD behavior", "Off-road tires", "Raised suspension", "Softer ARBs and damping for bumps"],
+      bestFor: "Cross-country, dirt trails, jumps, and rough routes."
+    },
+    Rally: {
+      title: `Recommended: ${target} Mixed-Surface Rally Build`,
+      why: isRally ? "This should be one of the car’s strongest build paths because the platform suits quick direction changes and loose-surface grip." : "This is a sharper dirt-road setup than Off-Road, meant for mixed grip and fast transitions.",
+      priorities: ["Rally tires", "Responsive but soft suspension", "AWD or stable stock drivetrain", "Shorter gearing for corner exit"],
+      bestFor: "Dirt racing, mixed-surface routes, technical sprints, and wet/loose surfaces."
+    }
+  };
+  return { targetClass: target, ...base[build] };
+}
+
+function generateTune(car, build, targetClass) {
+  const target = CLASS_RANGES[targetClass]?.range?.[1] || car.classNum;
+  const piGain = Math.max(0, target - car.classNum);
+  const powerStage = piGain > 260 ? "Ultimate" : piGain > 160 ? "Race" : piGain > 80 ? "Sport" : "Street";
+  const drivetrain = driveBias(car, build);
+  const isDirt = build === "Off-Road" || build === "Rally";
+  const isDrift = build === "Drift";
+  const isSpeed = build === "Top Speed";
+  const isRace = build === "Race";
+  const aero = isSpeed ? "Remove adjustable aero where possible; use light rear aero only if unstable" : isDrift ? "Factory aero or street body kit" : "Forza front splitter + adjustable rear wing";
+  const tireCompound = isDirt ? (build === "Rally" ? "Rally compound" : "Off-road race compound") : isDrift ? "Drift compound" : targetClass === "S2" || targetClass === "R" ? "Race slicks" : targetClass === "S1" ? "Semi-slicks" : "Sport tires";
+  const baseFront = isDirt ? 26.5 : isDrift ? 32.0 : isSpeed ? 29.5 : 28.0;
+  const baseRear = isDirt ? 25.5 : isDrift ? 30.0 : isSpeed ? 30.0 : 27.5;
+  const finalDrive = isSpeed ? 2.65 : isDrift ? 3.90 : isDirt ? 4.10 : 3.45;
+  const rearAccel = isDrift ? 88 : isDirt ? 70 : isSpeed ? 55 : 62;
+  const rearDecel = isDrift ? 18 : isDirt ? 25 : 18;
+  const frontAccel = drivetrain === "AWD" ? (isDirt ? 35 : 20) : "N/A";
+  const center = drivetrain === "AWD" ? (isDirt ? "60% rear" : "70% rear") : "N/A";
+  return {
+    targetPI: `${targetClass} ${target}`,
+    summary: `${build} build for ${car.name}. Targets ${targetClass} with ${drivetrain} behavior, ${tireCompound.toLowerCase()}, and ${isSpeed ? "low-drag gearing" : isDrift ? "high-angle rotation" : isDirt ? "traction-first suspension" : "grip-first aero balance"}.`,
+    parts: {
+      conversion: [
+        `Drivetrain: ${drivetrain}`,
+        `Engine swap: Keep stock unless power ceiling is too low; use lightest high-output swap for ${targetClass}`,
+        `Aspiration: ${isSpeed || piGain > 140 ? "Single turbo / race turbo" : "Stock or sport supercharger only if needed"}`,
+      ],
+      engine: [
+        `${powerStage} intake`, `${powerStage} exhaust`, `${piGain > 90 ? "Race" : "Sport"} cams`, `${piGain > 130 ? "Race valves" : "Sport valves"}`,
+        `${piGain > 170 ? "Race engine block/displacement" : "Stock displacement"}`, `${piGain > 120 ? "Race pistons/compression" : "Sport pistons if PI allows"}`,
+        `${isSpeed ? "Race turbo + race intercooler" : piGain > 150 ? "Sport turbo + sport intercooler" : "Stock forced induction"}`,
+      ],
+      platform: [
+        `${isDirt ? "Rally" : "Race"} brakes`, `${isDirt ? "Rally" : isDrift ? "Drift" : "Race"} springs and dampers`, `${isDrift ? "Drift" : "Race"} front and rear ARBs`,
+        `${isRace || targetClass === "S2" || targetClass === "R" ? "Race weight reduction" : "Sport weight reduction"}`, `${isDirt ? "Chassis reinforcement optional" : "No roll cage unless PI/handling requires it"}`,
+      ],
+      tires: [`${tireCompound}`, "Max rear width", `${isDrift ? "Stock or +1 front width" : "Max front width if PI allows"}`, `${isDirt ? "Rally/off-road rims; lightweight if PI allows" : "Lightweight race wheels"}`],
+      aero: [aero, `${isSpeed ? "Smoothest/lightest body parts" : "Lightweight hood/body parts where available"}`],
+      drivetrain: [`${isDrift ? "Race 4-speed/6-speed transmission" : "Race transmission"}`, "Race driveline", `${isDrift ? "Drift differential" : "Race differential"}`, `${targetClass === "R" || targetClass === "S2" ? "Race clutch" : "Sport clutch"}`],
+    },
+    settings: {
+      tires: { front: `${baseFront.toFixed(1)} PSI`, rear: `${baseRear.toFixed(1)} PSI` },
+      gearing: { finalDrive: finalDrive.toFixed(2), gear1: isSpeed ? "2.90" : "3.10", gear2: isSpeed ? "1.95" : "2.15", gear3: isSpeed ? "1.45" : "1.62", gear4: isSpeed ? "1.12" : "1.28", gear5: isSpeed ? "0.91" : "1.05", gear6: isSpeed ? "0.74" : "0.86" },
+      alignment: { frontCamber: isDrift ? "-5.0°" : isDirt ? "-1.4°" : "-2.0°", rearCamber: isDrift ? "-1.0°" : isDirt ? "-0.8°" : "-1.5°", frontToe: isDrift ? "+1.2°" : "0.0°", rearToe: isDrift ? "-0.2°" : "0.0°", caster: isDrift ? "7.0°" : "6.5°" },
+      antiRollBars: { front: isDrift ? "18.0" : isDirt ? "12.0" : "28.0", rear: isDrift ? "42.0" : isDirt ? "18.0" : "24.0" },
+      springs: { front: isDirt ? "Soft: 40% slider" : isDrift ? "Medium-soft: 45% slider" : "Medium: 55% slider", rear: isDrift ? "Stiff: 70% slider" : isDirt ? "Soft: 38% slider" : "Medium: 52% slider", rideHeightFront: isDirt ? "High" : isSpeed ? "Low" : "Low-mid", rideHeightRear: isDirt ? "High" : isSpeed ? "Low + 1 click" : "Low-mid + 1 click" },
+      damping: { frontRebound: isDirt ? "7.0" : "9.5", rearRebound: isDrift ? "11.5" : isDirt ? "7.5" : "9.0", frontBump: isDirt ? "3.5" : "5.5", rearBump: isDrift ? "6.2" : isDirt ? "3.8" : "5.0" },
+      aero: { front: isSpeed ? "Minimum" : isDrift ? "N/A" : "60% slider", rear: isSpeed ? "Minimum + stability clicks" : isDrift ? "N/A" : "70% slider" },
+      brakes: { balance: isDrift ? "48% front" : "52% front", pressure: isDrift ? "110%" : "105%" },
+      differential: { frontAccel, frontDecel: drivetrain === "AWD" ? "5%" : "N/A", rearAccel: `${rearAccel}%`, rearDecel: `${rearDecel}%`, centerBalance: center },
+    },
+    notes: [
+      "These are structured, exact baseline sheets generated from the car class/build type; test laps still matter.",
+      "If the car understeers, reduce front ARB by 2 or add rear ARB by 2.",
+      "If it oversteers on corner exit, lower rear differential acceleration by 5%."
+    ]
+  };
+}
+
+function App() {
+  const [tab, setTab] = useState("home");
+  const [search, setSearch] = useState("");
+  const [classFilter, setClassFilter] = useState("All");
+  const [buildFilter, setBuildFilter] = useState("Race");
+  const [selected, setSelected] = useState(() => ({ car: CARS[0], build: "Race", targetClass: clampTarget(CARS[0], recommendedTarget(CARS[0], "Race")) }));
+  const [comments, setComments] = useState([
+    { id:1, user:"DriftKing_JP", car:"1994 Mazda MX-5 Miata", build:"Drift", text:"Angle kit plus softer front ARB made the car much smoother on transitions.", time:"2h ago", likes:14 },
+    { id:2, user:"SpeedRunner99", car:"2023 Porsche 911 Turbo S", build:"Top Speed", text:"Lengthen 5th/6th and keep rear aero near minimum for highway pulls.", time:"5h ago", likes:28 },
+    { id:3, user:"JDM_Guru", car:"2017 Nissan GT-R (R35)", build:"Race", text:"S1 AWD with rear-biased diff is the sweet spot for road racing.", time:"1d ago", likes:42 },
+  ]);
+  const [newComment, setNewComment] = useState({ user:"", car:"", build:"Race", text:"" });
+
+  const makes = useMemo(() => new Set(CARS.map(c => c.make)).size, []);
+  const dlcCount = useMemo(() => CARS.filter(c => c.src === "DLC" || c.dlc).length, []);
+  const featured = useMemo(() => [...CARS].sort((a,b)=>b.classNum-a.classNum).slice(0,6), []);
+
+  const filteredCars = useMemo(() => CARS.filter(car => {
+    const q = search.toLowerCase().trim();
+    const matchesSearch = !q || [car.name, car.make, car.type, car.country, car.src, car.dlc].join(" ").toLowerCase().includes(q);
+    const matchesClass = classFilter === "All" || car.cls === classFilter;
+    return matchesSearch && matchesClass;
+  }), [search, classFilter]);
+
+  const targetOptions = selected?.car ? nextClassesFrom(selected.car.cls) : [];
+  const tune = selected?.car ? generateTune(selected.car, selected.build, selected.targetClass) : null;
+
+  function openBuild(car, build = buildFilter, targetClass = null) {
+    const safeTarget = clampTarget(car, targetClass || recommendedTarget(car, build));
+    setSelected({ car, build, targetClass: safeTarget });
+    setTab("builder");
+  }
+
+  function updateBuild(build) {
+    const car = selected.car;
+    setSelected({ car, build, targetClass: clampTarget(car, recommendedTarget(car, build)) });
+  }
+
+  function addComment() {
+    if (!newComment.user.trim() || !newComment.text.trim()) return;
+    setComments(prev => [{ id: Date.now(), user: newComment.user.trim(), car: newComment.car.trim() || "General", build: newComment.build, text: newComment.text.trim(), time: "Just now", likes: 0 }, ...prev]);
+    setNewComment({ user:"", car:"", build:"Race", text:"" });
+  }
+
+  return (
+    <div className="app-shell">
+      <style>{css}</style>
+      <header className="hero-nav">
+        <div className="brand" onClick={() => setTab("home")}>
+          <span className="brand-mark">FH</span>
+          <div><strong>Tuning Hub</strong><small>Pro build sheets · no X class</small></div>
+        </div>
+        <nav>
+          {[ ["home","Home"], ["garage","Garage"], ["builder","Tune Builder"], ["community","Community"] ].map(([key,label]) => (
+            <button key={key} className={tab===key ? "active" : ""} onClick={() => setTab(key)}>{label}</button>
+          ))}
+        </nav>
+      </header>
+
+      <main>
+        {tab === "home" && <Home cars={CARS.length} makes={makes} dlcCount={dlcCount} featured={featured} openBuild={openBuild} setTab={setTab} />}
+
+        {tab === "garage" && <Garage cars={filteredCars} search={search} setSearch={setSearch} classFilter={classFilter} setClassFilter={setClassFilter} buildFilter={buildFilter} setBuildFilter={setBuildFilter} openBuild={openBuild} />}
+
+        {tab === "builder" && selected?.car && <Builder selected={selected} setSelected={setSelected} targetOptions={targetOptions} tune={tune} updateBuild={updateBuild} />}
+
+        {tab === "community" && <Community comments={comments} newComment={newComment} setNewComment={setNewComment} addComment={addComment} />}
+      </main>
+    </div>
+  );
+}
+
+function Home({ cars, makes, dlcCount, featured, openBuild, setTab }) {
+  return <section className="landing-v2">
+    <div className="landing-hero panel">
+      <div className="hero-kicker"><span></span> FH Build Studio</div>
+      <h1>Pick a car. Choose the vibe. Get the build.</h1>
+      <p>Cleaner, darker, more cinematic: this version makes the home page feel like a proper tuning studio instead of a stats dashboard.</p>
+      <div className="hero-actions">
+        <button className="primary" onClick={() => setTab("garage")}>Browse Garage</button>
+        <button className="ghost" onClick={() => setTab("builder")}>Open Current Build</button>
+      </div>
+      <div className="quick-stats">
+        <span><strong>{cars}</strong> cars</span>
+        <span><strong>{makes}</strong> makes</span>
+        <span><strong>5</strong> build styles</span>
+        <span><strong>{dlcCount}</strong> DLC/special</span>
+      </div>
+    </div>
+
+    <div className="studio-card panel grip-card">
+      <p className="eyebrow">Recommended mood</p>
+      <h2>All-around grip builds</h2>
+      <p>Balanced race setups for cars like the Ferrari FXX-K Evo: high corner speed, stable braking, clean exits, and confidence on technical circuits.</p>
+      <button className="ghost wide" onClick={() => setTab("garage")}>Find a Grip Car</button>
+    </div>
+
+    <div className="build-lanes">
+      {BUILD_TYPES.map(type => <button key={type} className="lane-card" onClick={() => setTab("garage")}>
+        <span>{BUILD_META[type].icon}</span>
+        <strong>{type}</strong>
+        <small>{BUILD_META[type].tag}</small>
+      </button>)}
+    </div>
+
+    <div className="panel span-wide">
+      <div className="section-title">Featured builds to start with</div>
+      <div className="featured-grid editorial-grid">{featured.map((car, i) => <CarMini key={car.name} car={car} onClick={() => openBuild(car, i % 2 ? "Top Speed" : "Race")} />)}</div>
+    </div>
+  </section>;
+}
+
+function Garage({ cars, search, setSearch, classFilter, setClassFilter, buildFilter, setBuildFilter, openBuild }) {
+  return <section>
+    <div className="toolbar panel">
+      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search car, make, type, country, DLC..." />
+      <div className="chip-row">
+        {["All", ...CLASS_ORDER].map(cls => <button key={cls} onClick={()=>setClassFilter(cls)} className={classFilter===cls ? "chip active" : "chip"} style={cls!=="All" ? {"--accent": classColor(cls)} : {}}>{cls}</button>)}
+      </div>
+      <div className="chip-row">{BUILD_TYPES.map(b => <button key={b} onClick={()=>setBuildFilter(b)} className={buildFilter===b ? "chip active red" : "chip"}>{BUILD_META[b].icon} {b}</button>)}</div>
+    </div>
+    <div className="garage-count">{cars.length} cars shown · click a card for a {buildFilter} build</div>
+    <div className="car-grid">{cars.map(car => <CarCard key={car.name} car={car} build={buildFilter} openBuild={openBuild} />)}</div>
+  </section>;
+}
+
+function Builder({ selected, setSelected, targetOptions, tune, updateBuild }) {
+  const { car, build, targetClass } = selected;
+  return <section className="builder-layout">
+    <aside className="panel sticky-card">
+      <p className="eyebrow">Selected build</p>
+      <h2>{car.name}</h2>
+      <div className="meta-line">{car.type} · {car.country} · {car.src}{car.dlc ? ` · ${car.dlc}` : ""}</div>
+      <div className="pill-row"><ClassPill cls={car.cls} pi={car.classNum}/><span className="soft-pill">Target {tune.targetPI}</span></div>
+      <label>Build type</label>
+      <div className="stacked-buttons">{BUILD_TYPES.map(b => <button key={b} className={build===b ? "active" : ""} onClick={()=>updateBuild(b)}>{BUILD_META[b].icon} {b}</button>)}</div>
+      <label>Target class</label>
+      <select value={targetClass} onChange={e=>setSelected(s => ({...s, targetClass: e.target.value}))}>{targetOptions.map(cls => <option key={cls} value={cls}>{cls} — {CLASS_RANGES[cls].label}</option>)}</select>
+      <div className="build-count">Available for this car: {buildOptionsFor(car).length} build/class combinations</div>
+    </aside>
+    <div>
+      <div className="panel tune-hero"><p className="eyebrow">{build} blueprint</p><h2>{tune.summary}</h2></div>
+      <RecommendationPanel recommendation={getBuildRecommendation(car, build, targetClass)} />
+      <div className="two-col">
+        <Parts title="Parts to buy" groups={tune.parts} />
+        <Settings title="Exact tune settings" data={tune.settings} />
+      </div>
+      <div className="panel"><div className="section-title">Fine-tuning notes</div>{tune.notes.map(n => <p className="note" key={n}>› {n}</p>)}</div>
+    </div>
+  </section>;
+}
+
+function Community({ comments, newComment, setNewComment, addComment }) {
+  return <section className="community-layout">
+    <div className="panel"><div className="section-title">Share your build tips</div><div className="form-grid"><input placeholder="Gamertag" value={newComment.user} onChange={e=>setNewComment(p=>({...p,user:e.target.value}))}/><input placeholder="Car name optional" value={newComment.car} onChange={e=>setNewComment(p=>({...p,car:e.target.value}))}/></div><select value={newComment.build} onChange={e=>setNewComment(p=>({...p,build:e.target.value}))}>{BUILD_TYPES.map(b=><option key={b}>{b}</option>)}</select><textarea placeholder="Share tune settings, part choices, or driving notes..." value={newComment.text} onChange={e=>setNewComment(p=>({...p,text:e.target.value}))}/><button className="primary" onClick={addComment}>Post Tip</button></div>
+    <div>{comments.map(c => <article className="comment" key={c.id}><div><strong>{c.user}</strong><span>{c.time}</span></div><small>{c.car} · {c.build}</small><p>{c.text}</p><em>♥ {c.likes}</em></article>)}</div>
+  </section>;
+}
+
+function Stat({ label, value }) { return <div className="stat panel"><strong>{value}</strong><span>{label}</span></div>; }
+function ClassPill({ cls, pi }) { return <span className="class-pill" style={{color:classColor(cls), borderColor:classColor(cls), background:CLASS_RANGES[cls]?.bg}}>{cls} {pi}</span>; }
+function CarMini({ car, onClick }) { return <button className="mini-card" onClick={onClick}><ClassPill cls={car.cls} pi={car.classNum}/><strong>{car.name}</strong><span>{car.type}</span></button>; }
+function CarCard({ car, build, openBuild }) { const options = buildOptionsFor(car); return <article className="car-card" onClick={()=>openBuild(car, build)}><div><strong>{car.name}</strong><ClassPill cls={car.cls} pi={car.classNum}/></div><p>{car.type} · {car.country}</p><div className="card-foot"><span>{options.length} build paths</span><button onClick={(e)=>{e.stopPropagation(); openBuild(car, build);}}>Build {build}</button></div></article>; }
+
+function RecommendationPanel({ recommendation }) { return <div className="panel recommend-panel">
+  <div>
+    <div className="section-title">Recommended for this build</div>
+    <h2>{recommendation.title}</h2>
+    <p>{recommendation.why}</p>
+    <div className="best-for"><strong>Best for:</strong> {recommendation.bestFor}</div>
+  </div>
+  <div className="priority-list">{recommendation.priorities.map(item => <span key={item}>★ {item}</span>)}</div>
+</div>; }
+function Parts({ title, groups }) { return <div className="panel"><div className="section-title">{title}</div>{Object.entries(groups).map(([group, items]) => <div className="part-group" key={group}><h3>{group}</h3>{items.map(item => <p key={item}>✓ {item}</p>)}</div>)}</div>; }
+function Settings({ title, data }) { return <div className="panel"><div className="section-title">{title}</div>{Object.entries(data).map(([group, values]) => <div className="setting-group" key={group}><h3>{group}</h3>{Object.entries(values).map(([k,v]) => <div className="setting-row" key={k}><span>{k.replace(/([A-Z])/g," $1")}</span><strong>{v}</strong></div>)}</div>)}</div>; }
+
+const css = `
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box}body{margin:0}.app-shell{min-height:100vh;color:#f8fafc;font-family:Inter,system-ui,sans-serif;background:#05070b;background-image:linear-gradient(120deg,rgba(14,165,233,.12),transparent 34%),radial-gradient(circle at 85% 12%,rgba(250,204,21,.15),transparent 30%),radial-gradient(circle at 20% 90%,rgba(168,85,247,.16),transparent 34%),linear-gradient(180deg,#05070b,#0b111c 42%,#080a0f)}
+.hero-nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 28px;background:rgba(5,7,11,.74);backdrop-filter:blur(22px);border-bottom:1px solid rgba(255,255,255,.08)}.brand{display:flex;gap:12px;align-items:center;cursor:pointer}.brand-mark{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#f8fafc;color:#05070b;font-weight:900}.brand strong{display:block;font-size:18px;font-family:Space Grotesk,Inter,sans-serif}.brand small{display:block;color:#94a3b8;font-size:12px;margin-top:2px}nav{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit}nav button,.ghost,.chip,.stacked-buttons button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.045);color:#cbd5e1;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}nav button.active,.chip.active{background:#f8fafc;color:#05070b}.primary{border:0;border-radius:999px;background:#facc15;color:#05070b;padding:12px 18px;font-weight:950;cursor:pointer;box-shadow:0 18px 50px rgba(250,204,21,.18)}main{max-width:1440px;margin:0 auto;padding:28px}.panel,.hero-card,.comment,.car-card,.mini-card,.lane-card{background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.11);border-radius:30px;box-shadow:0 30px 90px rgba(0,0,0,.28)}
+.landing-v2{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}.landing-hero{min-height:520px;padding:54px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}.landing-hero:before{content:"";position:absolute;inset:28px;border:1px solid rgba(255,255,255,.09);border-radius:26px;pointer-events:none}.landing-hero:after{content:"";position:absolute;right:-120px;top:-90px;width:430px;height:430px;border-radius:50%;background:radial-gradient(circle,rgba(250,204,21,.24),transparent 64%);filter:blur(6px)}.hero-kicker{display:flex;align-items:center;gap:10px;color:#facc15;font-weight:900;text-transform:uppercase;letter-spacing:.16em;font-size:12px;position:relative;z-index:1}.hero-kicker span{width:38px;height:2px;background:#facc15;display:inline-block}.landing-hero h1{font-family:Space Grotesk,Inter,sans-serif;font-size:76px;line-height:.86;letter-spacing:-.06em;max-width:830px;margin:18px 0;position:relative;z-index:1}.landing-hero p{max-width:660px;color:#cbd5e1;font-size:18px;line-height:1.7;position:relative;z-index:1}.hero-actions{display:flex;gap:12px;margin:26px 0;position:relative;z-index:1}.quick-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;position:relative;z-index:1}.quick-stats span{border:1px solid rgba(255,255,255,.09);background:rgba(5,7,11,.44);border-radius:18px;padding:14px;color:#94a3b8}.quick-stats strong{display:block;color:#fff;font-size:22px}.studio-card{padding:32px;min-height:250px}.grip-card{display:flex;flex-direction:column;justify-content:end;background:linear-gradient(145deg,rgba(14,165,233,.14),rgba(250,204,21,.08)),rgba(255,255,255,.04)}.studio-card h2{font-family:Space Grotesk,Inter,sans-serif;font-size:34px;line-height:1;margin:8px 0 12px}.studio-card p{color:#cbd5e1;line-height:1.65}.wide{width:100%;margin-top:16px}.build-lanes{grid-column:span 2;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.lane-card{text-align:left;color:#fff;padding:22px;cursor:pointer;min-height:150px;transition:.18s transform,.18s border-color}.lane-card:hover,.car-card:hover,.mini-card:hover{transform:translateY(-3px);border-color:rgba(250,204,21,.35)}.lane-card span{font-size:26px}.lane-card strong{display:block;font-size:20px;margin:16px 0 8px}.lane-card small{color:#94a3b8}.span-wide{grid-column:span 2;padding:24px}.home-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.span-2{grid-column:span 2}.eyebrow{text-transform:uppercase;letter-spacing:.14em;color:#facc15;font-size:12px;font-weight:900}.disclaimer,.garage-count,.meta-line,.build-count,.note{color:#94a3b8;font-size:13px;line-height:1.6}.stat{padding:24px;display:flex;flex-direction:column;justify-content:end;min-height:160px}.stat strong{font-size:42px}.stat span{color:#94a3b8}.section-title{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:#e2e8f0;font-weight:950;margin-bottom:16px}.featured-grid,.car-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}.editorial-grid{grid-template-columns:repeat(3,1fr)}.mini-card,.car-card{text-align:left;color:white;padding:18px;cursor:pointer}.mini-card strong,.mini-card span{display:block;margin-top:10px}.mini-card span,.car-card p{color:#94a3b8;font-size:13px}.toolbar{padding:18px;display:grid;gap:14px;margin-bottom:16px}.toolbar input,input,select,textarea{width:100%;border:1px solid rgba(255,255,255,.12);background:rgba(2,6,23,.78);color:white;border-radius:16px;padding:13px 14px;font:inherit;outline:none}textarea{min-height:120px;resize:vertical}.chip-row{display:flex;gap:8px;flex-wrap:wrap}.chip.active:not(.red){background:var(--accent,#fff);border-color:var(--accent,#fff);color:#080a12}.chip.red.active{background:#facc15;color:#05070b}.car-card{border-radius:24px}.car-card>div:first-child{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.class-pill{display:inline-flex;border:1px solid;border-radius:999px;padding:4px 9px;font-weight:900;font-size:12px;white-space:nowrap}.card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:18px;color:#94a3b8;font-size:12px}.card-foot button{border:0;background:#facc15;color:#05070b;border-radius:999px;padding:8px 12px;font-weight:950;cursor:pointer}.builder-layout{display:grid;grid-template-columns:340px 1fr;gap:18px}.sticky-card{position:sticky;top:100px;padding:22px;height:max-content}.sticky-card h2,.tune-hero h2{margin:6px 0 10px;line-height:1.15;font-family:Space Grotesk,Inter,sans-serif}.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.soft-pill{display:inline-flex;background:rgba(255,255,255,.08);border-radius:999px;padding:5px 10px;color:#cbd5e1;font-weight:800;font-size:12px}.sticky-card label{display:block;color:#94a3b8;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.10em;margin:18px 0 8px}.stacked-buttons{display:grid;gap:8px}.stacked-buttons button{text-align:left;border-radius:16px}.stacked-buttons button.active{background:#facc15;color:#05070b}.tune-hero{padding:26px;margin-bottom:18px}.recommend-panel{padding:24px;margin-bottom:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;background:linear-gradient(135deg,rgba(14,165,233,.14),rgba(250,204,21,.08)),rgba(255,255,255,.055)}.recommend-panel h2{margin:0 0 10px;font-size:24px;letter-spacing:-.02em;font-family:Space Grotesk,Inter,sans-serif}.recommend-panel p,.best-for{color:#cbd5e1;line-height:1.6}.best-for{margin-top:12px}.priority-list{display:grid;gap:10px}.priority-list span{display:block;border:1px solid rgba(255,255,255,.10);background:rgba(2,6,23,.55);border-radius:16px;padding:12px 14px;color:#e2e8f0;font-weight:700}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.part-group,.setting-group{border-top:1px solid rgba(255,255,255,.08);padding:14px 0}.part-group h3,.setting-group h3{text-transform:capitalize;margin:0 0 10px;color:#facc15}.part-group p{margin:7px 0;color:#dbeafe;line-height:1.45}.setting-row{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(255,255,255,.06);padding:8px 0}.setting-row span{color:#94a3b8;text-transform:capitalize}.setting-row strong{text-align:right}.community-layout{display:grid;grid-template-columns:420px 1fr;gap:18px}.community-layout .panel{padding:22px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.community-layout select,.community-layout textarea{margin-top:10px}.community-layout button{margin-top:12px}.comment{padding:18px;margin-bottom:12px}.comment div{display:flex;justify-content:space-between}.comment small,.comment span{color:#94a3b8}.comment p{color:#e2e8f0;line-height:1.6}@media(max-width:1000px){.landing-v2,.build-lanes,.builder-layout,.two-col,.community-layout,.recommend-panel{grid-template-columns:1fr}.span-wide{grid-column:span 1}.landing-hero h1{font-size:48px}.quick-stats{grid-template-columns:repeat(2,1fr)}.editorial-grid{grid-template-columns:1fr}.hero-nav{align-items:flex-start;flex-direction:column}.sticky-card{position:static}}`;
+
+
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+  </script>
+</body>
+</html>
